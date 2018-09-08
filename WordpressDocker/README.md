@@ -1,2 +1,2 @@
 # Vagrant
-Vagrant config example
+Wordpress + MySql by Docker
