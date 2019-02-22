@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+ config.vm.box = "ubuntu/xenial64"
+
+  config.vm.synced_folder ".", "/vagrant"#, disabled: true
+  #config.vm.synced_folder "../", "/vagrant"
+
+  config.vm.network "forwarded_port", guest: 8005, host: 8005
+  config.vm.network "forwarded_port", guest: 8006, host: 8006
+  config.vm.network "forwarded_port", guest: 8007, host: 8007
+
+  config.vm.network "private_network", ip: "192.168.188.110"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = 'my-apps-docker-vm'
+    vb.memory = 2048
+    vb.cpus = 1
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+  end
+  
+  config.vm.provision :docker , run: "always"
+  config.vm.provision "shell",  
+    path: "data/install-docker-compose.sh",
+    run: "once"
+
+  # Start docker-compose in the background
+ # config.vm.provision "shell", 
+   # path: "data/start-docker-compose.sh",
+ #   run: "always"
+  config.vm.provision :docker_compose, yml: ["/vagrant/docker-compose.yml"], rebuild: true, project_name: "my-apps", run: "always"
+end
